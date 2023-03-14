@@ -1,7 +1,20 @@
-const db = require("../models");
-const User = db.user;
+import db from "../models/index.js";
+import fetch from "node-fetch";
 
-checkDuplicateUsernameOrEmail = (req, res, next) => {
+const User = db.user;
+const discogsEndpoint = "https://api.discogs.com/users/";
+
+const verifySignUp = async (req, res, next) => {
+  // Check if username exists in discogs
+  const discogsReq = await fetch(`${discogsEndpoint}${req.body.username}`);
+  const discogsRes = await discogsReq.json();
+  if (!discogsRes.id) {
+    res.status(400).send({
+      message: "Failed! Username does not exist on Discogs",
+    });
+    return;
+  }
+
   // Username
   User.findOne({
     where: {
@@ -33,8 +46,4 @@ checkDuplicateUsernameOrEmail = (req, res, next) => {
   });
 };
 
-const verifySignUp = {
-  checkDuplicateUsernameOrEmail: checkDuplicateUsernameOrEmail,
-};
-
-module.exports = verifySignUp;
+export default verifySignUp;

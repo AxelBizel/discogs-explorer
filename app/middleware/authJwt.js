@@ -1,6 +1,5 @@
-const jwt = require("jsonwebtoken");
-const config = require("../config/auth.config.js");
-const db = require("../models");
+import jwt from "jsonwebtoken";
+import config from "../config/auth.config.js";
 
 const { TokenExpiredError } = jwt;
 
@@ -14,7 +13,7 @@ const catchError = (err, res) => {
   return res.sendStatus(401).send({ message: "Unauthorized!" });
 };
 
-verifyToken = (req, res, next) => {
+const verifyToken = (req, res, next) => {
   let token = req.headers["x-access-token"];
 
   if (!token) {
@@ -35,4 +34,4 @@ verifyToken = (req, res, next) => {
 const authJwt = {
   verifyToken: verifyToken,
 };
-module.exports = authJwt;
+export default authJwt;

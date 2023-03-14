@@ -1,10 +1,12 @@
-require("dotenv").config();
-const express = require("express");
-const bodyParser = require("body-parser");
-const cors = require("cors");
+import dotenv from "dotenv";
+dotenv.config();
+import express from "express";
+import bodyParser from "body-parser";
+import cors from "cors";
+import db from "./app/models/index.js";
+import authRoutes from "./app/routes/auth.routes.js";
 
 const app = express();
-const db = require("./app/models");
 const User = db.user;
 
 db.sequelize.sync();
@@ -27,7 +29,7 @@ app.get("/", (req, res) => {
 });
 
 // routes
-require("./app/routes/auth.routes")(app);
+authRoutes(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;

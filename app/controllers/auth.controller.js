@@ -1,13 +1,12 @@
-const db = require("../models");
-const config = require("../config/auth.config");
-const { user: User, refreshToken: RefreshToken } = db;
+import db from "../models/index.js";
+import jwt from "jsonwebtoken";
+import config from "../config/auth.config.js";
+import bcrypt from "bcryptjs";
 
+const { user: User, refreshToken: RefreshToken } = db;
 const Op = db.Sequelize.Op;
 
-var jwt = require("jsonwebtoken");
-var bcrypt = require("bcryptjs");
-
-exports.signup = (req, res) => {
+const signup = (req, res) => {
   // Save User to Database
   User.create({
     username: req.body.username,
@@ -22,7 +21,7 @@ exports.signup = (req, res) => {
     });
 };
 
-exports.login = (req, res) => {
+const login = (req, res) => {
   User.findOne({
     where: {
       username: req.body.username,
@@ -33,7 +32,7 @@ exports.login = (req, res) => {
         return res.status(404).send({ message: "User Not found." });
       }
 
-      var passwordIsValid = bcrypt.compareSync(
+      const passwordIsValid = bcrypt.compareSync(
         req.body.password,
         user.password
       );
@@ -64,7 +63,7 @@ exports.login = (req, res) => {
     });
 };
 
-exports.refreshToken = async (req, res) => {
+const refreshToken = async (req, res) => {
   const { refreshToken: requestToken } = req.body;
 
   if (requestToken == null) {
@@ -103,3 +102,5 @@ exports.refreshToken = async (req, res) => {
     return res.status(500).send({ message: err });
   }
 };
+
+export default { signup, refreshToken, login };
