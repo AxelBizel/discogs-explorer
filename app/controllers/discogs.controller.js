@@ -4,6 +4,7 @@ import discogsClient from "disconnect";
 const Discogs = discogsClient.Client;
 
 const {
+  user: User,
   release: Release,
   artist: Artist,
   artists_releases: Artists_Releases,
@@ -17,8 +18,8 @@ const {
 const discogs = new Discogs(discogsConfig).user().collection();
 const paginationNumber = 50;
 
-const getItemsNumber = async () => {
-  const rawItems = await discogs.getReleases("iktor", 0, {
+const getItemsNumber = async (user) => {
+  const rawItems = await discogs.getReleases(user, 0, {
     page: 1,
     per_page: 1,
   });
@@ -26,35 +27,38 @@ const getItemsNumber = async () => {
 };
 
 const getCollection = async (req, res) => {
-  console.log("INIT FETCH");
-  const itemNumber = await getItemsNumber();
+  // get user id and username from access token
+  const owner = await User.findByPk(req.userId);
+  // get collection length and pages
+  const itemNumber = await getItemsNumber(owner.username);
   const pages = Math.ceil(itemNumber / paginationNumber);
+  // fetch collection
   const collection = [];
   for (let i = 1; i <= pages; i++) {
-    const rawCollection = await discogs.getReleases("iktor", 0, {
+    const rawCollection = await discogs.getReleases(owner.username, 0, {
       page: `${i}`,
       per_page: paginationNumber,
     });
     Array.prototype.push.apply(collection, rawCollection.releases);
   }
 
-  // // test > 1 release only
-  // const rawCollection = await discogs.getReleases("iktor", 0, {
+  // test > 1 release only
+  // const rawCollection = await discogs.getReleases(owner.username, 0, {
   //   page: 1,
   //   per_page: 1,
   // });
-
   // const collection = rawCollection.releases;
 
   res.status(200).send({
     collection,
   });
-  return storeItems(collection);
+  //store data in database
+  return storeItems(collection, owner.id);
 };
 
-const storeItems = (collection) => {
+const storeItems = (collection, owner) => {
   collection.forEach(async (item) => {
-    const newRelease = await handleRelease(item);
+    const newRelease = await handleRelease(item, owner);
     await handleArtists(item, newRelease);
     await handleLabels(item, newRelease);
     await handleGenres(item, newRelease);
@@ -62,7 +66,7 @@ const storeItems = (collection) => {
   });
 };
 
-const handleRelease = async (item) => {
+const handleRelease = async (item, owner) => {
   const releaseBody = {
     discogsId: item.id,
     title: item.basic_information.title,
@@ -71,7 +75,7 @@ const handleRelease = async (item) => {
     cover_url: item.basic_information.cover_image,
     cover_thumbnail: item.basic_information.thumb,
     release_year: item.basic_information.year,
-    userId: 1,
+    userId: owner,
   };
   const newRelease = await Release.create(releaseBody);
   return newRelease;
@@ -163,7 +167,6 @@ const handleStyles = async (item, release) => {
 
 const handleGenres = async (item, release) => {
   item.basic_information.genres?.forEach(async (g) => {
-    console.log("genre", g);
     await Genre.findOrCreate({
       where: { name: g },
     });

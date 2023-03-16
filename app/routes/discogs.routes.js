@@ -1,4 +1,5 @@
 import controller from "../controllers/discogs.controller.js";
+import verifyToken from "../middleware/verifyToken.js";
 
 export default function (app) {
   app.use(function (req, res, next) {
@@ -9,5 +10,5 @@ export default function (app) {
     next();
   });
 
-  app.post("/api/fetch-collection", controller.getCollection);
+  app.post("/api/fetch-collection", verifyToken, controller.getCollection);
 }
