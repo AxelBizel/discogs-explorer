@@ -5,10 +5,11 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import db from "./app/models/index.js";
 import authRoutes from "./app/routes/auth.routes.js";
+import discogsRoutes from "./app/routes/discogs.routes.js";
 
 const app = express();
-const User = db.user;
 
+// db.sequelize.sync({ force: true });
 db.sequelize.sync();
 
 var corsOptions = {
@@ -30,6 +31,7 @@ app.get("/", (req, res) => {
 
 // routes
 authRoutes(app);
+discogsRoutes(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
