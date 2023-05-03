@@ -13,5 +13,17 @@ export default function (app: express.Application) {
 
   app.post("/api/fetch-collection", verifyToken, controller.fetchCollection);
   app.post("/api/collection", verifyToken, controller.getCollection);
-  app.post("/api/collection-by-year", verifyToken, controller.getCollectionByYear);
+  app.post(
+    "/api/collection-by-year",
+    verifyToken,
+    controller.countByReleaseYears
+  );
+  app.post(
+    "/api/collection-by-artists",
+    verifyToken,
+    controller.countByArtists
+  );
+  app.post("/api/collection-by-styles", verifyToken, controller.countByStyles);
+  app.post("/api/collection-by-genres", verifyToken, controller.countByGenres);
+  app.post("/api/collection-by-labels", verifyToken, controller.countByLabels);
 }

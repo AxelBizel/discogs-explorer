@@ -283,22 +283,114 @@ const getCollection = async (req: any, res: Response) => {
   });
 };
 
-const getCollectionByYear = async (req: any, res: Response) => {
-  const userReleases = await prisma.releases.groupBy({
-    by: ["releaseYear"],
-    _count: { _all: true },
-    orderBy: { releaseYear: "asc" },
-  });
+const countByReleaseYears = async (req: any, res: Response) => {
+  try {
+    const releasesGroupedByYears = await prisma.releases.groupBy({
+      by: ["releaseYear"],
+      _count: { _all: true },
+      orderBy: { releaseYear: "asc" },
+      where: { userId: req.user.id },
+    });
 
-  const parsedYears = userReleases
-    .map((y) => {
-      return { year: y.releaseYear, count: y._count._all };
-    })
-    .filter((y) => (y.year as number) > 0);
+    const parsedYears = releasesGroupedByYears
+      .map((y) => {
+        return { year: y.releaseYear, count: y._count._all };
+      })
+      .filter((y) => (y.year as number) > 0);
 
-  res.status(200).send({
-    parsedYears,
-  });
+    res.status(200).send({
+      parsedYears,
+    });
+  } catch (error) {
+    res.status(error.code).send({
+      message: error.message,
+    });
+  }
+  return;
+};
+
+const countByArtists = async (req: any, res: Response) => {
+  try {
+    const result = await prisma.$queryRaw`
+      SELECT count(release)::int as nb, a.name from artists_releases ar
+        inner join artists a on ar.artist = a.id
+        inner join releases r on ar.release = r.id
+        where r."userId" = ${req.user.id}
+        group by a.name
+        order by nb desc`;
+
+    res.status(200).send({
+      result,
+    });
+  } catch (error) {
+    res.status(error.code).send({
+      message: error.message,
+    });
+  }
+  return;
+};
+
+const countByLabels = async (req: any, res: Response) => {
+  try {
+    const result = await prisma.$queryRaw`
+      SELECT count(release)::int as nb, l.name from labels_releases lr
+        inner join labels l on lr.label = l.id
+        inner join releases r on lr.release = r.id
+        where r."userId" =  ${req.user.id}
+        group by l.name
+	      order by nb desc`;
+
+    res.status(200).send({
+      result,
+    });
+  } catch (error) {
+    res.status(error.code).send({
+      message: error.message,
+    });
+  }
+  return;
+};
+
+const countByStyles = async (req: any, res: Response) => {
+  try {
+    const result = await prisma.$queryRaw`
+      SELECT count(release)::int as nb, s.name from styles_releases sr
+        inner join styles s on sr.style = s.id
+        inner join releases r on sr.release = r.id
+        where r."userId" = ${req.user.id}
+        group by s.name
+	      order by nb desc`;
+
+    res.status(200).send({
+      result,
+    });
+  } catch (error) {
+    res.status(error.code).send({
+      message: error.message,
+    });
+  }
+  return;
+};
+
+const countByGenres = async (req: any, res: Response) => {
+  try {
+    const result = await prisma.$queryRaw`
+      SELECT count(release)::int as nb, g.name from genres_releases gr
+        inner join genres g on gr.genre = g.id
+        inner join releases r on gr.release = r.id
+        where r."userId" = ${req.user.id}
+        group by g.name
+	      order by nb desc`;
+
+    res.status(200).send({
+      result,
+    });
+  } catch (error) {
+    res.status(error.code).send({
+      message: error.message,
+    });
+  }
+  return;
 };
 
 // const handleMasterReleaseYear = async (release: releases) => {
@@ -311,4 +403,12 @@ const getCollectionByYear = async (req: any, res: Response) => {
 //   }
 // };
 
-export default { fetchCollection, getCollection, getCollectionByYear };
+export default {
+  fetchCollection,
+  getCollection,
+  countByReleaseYears,
+  countByArtists,
+  countByGenres,
+  countByLabels,
+  countByStyles,
+};
