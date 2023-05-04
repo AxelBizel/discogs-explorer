@@ -6,7 +6,7 @@ import { releases } from "@prisma/client";
 // import fetch from "node-fetch";
 
 const discogs = new discogsClient.Client(discogsConfig).user().collection();
-const paginationNumber = 50;
+const paginationNumber = 100;
 
 interface ArtistOrLabel {
   id: number;
@@ -33,6 +33,8 @@ interface DiscogsItem {
   };
 }
 
+let lastDiscogsPageFetched: number = 1;
+
 const handleRaceError = (error: any) => {
   if (error.code === "P2002") {
     return;
@@ -49,8 +51,35 @@ const getItemsNumber = async (user: string) => {
   return rawItems.pagination.pages;
 };
 
+const discogsCollectionQuery = async (
+  owner: { username: string; id: number },
+  pages: number,
+  firstPage: number
+): Promise<{
+  status: string;
+  error: any | null;
+}> => {
+  for (let i = firstPage; i <= pages; i++) {
+    try {
+      const rawCollection = await discogs.getReleases(owner.username, 0, {
+        page: `${i}`,
+        per_page: paginationNumber,
+      });
+      const fetchedReleases: DiscogsItem[] = rawCollection.releases;
+      storeItems(fetchedReleases, owner.id);
+    } catch (error) {
+      lastDiscogsPageFetched = i;
+      return { status: "error", error: error };
+    }
+  }
+
+  return {
+    status: "success",
+    error: null,
+  };
+};
+
 const fetchCollection = async (req: any, res: Response) => {
-  // get user id and username from access token
   const owner = await prisma.users.findUnique({
     where: {
       id: req.user.id,
@@ -64,32 +93,37 @@ const fetchCollection = async (req: any, res: Response) => {
     return;
   }
 
-  // get collection length and pages
+  // fetch pagination and items number and send to client
   const itemNumber = await getItemsNumber(owner.username);
-  console.log(itemNumber);
   const pages = Math.ceil(itemNumber / paginationNumber);
-  // fetch collection
-  const collection: any[] = [];
-  for (let i = 1; i <= pages; i++) {
-    const rawCollection = await discogs.getReleases(owner.username, 0, {
-      page: `${i}`,
-      per_page: paginationNumber,
-    });
-    Array.prototype.push.apply(collection, rawCollection.releases);
-  }
-
-  // test > 1 release only
-  // const rawCollection = await discogs.getReleases(owner.username, 0, {
-  //   page: 1,
-  //   per_page: 1,
-  // });
-  // const collection: any = rawCollection.releases;
-
   res.status(200).send({
-    collection,
+    itemNumber,
   });
-  //store data in database
-  return storeItems(collection, owner.id);
+
+  // fetch and store releases in database
+  const collectionRes = await discogsCollectionQuery(
+    owner,
+    pages,
+    lastDiscogsPageFetched
+  );
+  if (
+    collectionRes.status === "error" &&
+    collectionRes.error.statusCode === 429
+  ) {
+    const retryInterval = setInterval(async () => {
+      console.log("retry");
+      const collectionRetry = await discogsCollectionQuery(
+        owner,
+        pages,
+        lastDiscogsPageFetched
+      );
+      console.log("COL RETRY RES", collectionRetry);
+      if (collectionRetry.status === "success") {
+        clearInterval(retryInterval);
+      }
+    }, 5000);
+  }
+  return;
 };
 
 const storeItems = (collection: DiscogsItem[], owner: number) => {
@@ -102,7 +136,6 @@ const storeItems = (collection: DiscogsItem[], owner: number) => {
       await handleStyles(item, newRelease);
     }
   });
-  return console.log("STORAGE DONE");
 };
 
 const handleRelease = async (item: DiscogsItem, owner: number) => {
