@@ -3,16 +3,12 @@ dotenv.config();
 import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
-import db from "./app/models/index.js";
-import authRoutes from "./app/routes/auth.routes.js";
-import discogsRoutes from "./app/routes/discogs.routes.js";
+import authRoutes from "./src/routes/authRoutes.js";
+import discogsRoutes from "./src/routes/discogs.routes.js";
 
 const app = express();
 
-// db.sequelize.sync({ force: true });
-db.sequelize.sync();
-
-var corsOptions = {
+const corsOptions = {
   origin: "http://localhost:8081",
 };
 

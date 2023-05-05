@@ -1,0 +1,126 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["extendedWhereUnique"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model artists {
+  id               Int                @id @unique @default(autoincrement())
+  discogsId        Int                @unique
+  name             String             @db.VarChar(255)
+  resourceUrl      String?            @db.VarChar(255)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  artists_releases artists_releases[]
+}
+
+model artists_releases {
+  release  Int
+  artist   Int
+  artists  artists  @relation(fields: [artist], references: [id], onDelete: Cascade)
+  releases releases @relation(fields: [release], references: [id], onDelete: Cascade)
+
+  @@unique([release, artist])
+}
+
+model genres {
+  id              Int               @id @unique @default(autoincrement())
+  name            String            @unique @db.VarChar(255)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  genres_releases genres_releases[]
+}
+
+model genres_releases {
+  release  Int
+  genre    Int
+  genres   genres   @relation(fields: [genre], references: [id], onDelete: Cascade)
+  releases releases @relation(fields: [release], references: [id], onDelete: Cascade)
+
+  @@unique([release, genre])
+}
+
+model labels {
+  id              Int               @id @unique @default(autoincrement())
+  discogsId       Int               @unique
+  name            String            @db.VarChar(255)
+  resourceUrl     String?           @db.VarChar(255)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  labels_releases labels_releases[]
+}
+
+model labels_releases {
+  release  Int
+  label    Int
+  labels   labels   @relation(fields: [label], references: [id], onDelete: Cascade)
+  releases releases @relation(fields: [release], references: [id], onDelete: Cascade)
+
+  @@unique([release, label])
+}
+
+model refreshTokens {
+  id         Int       @id @unique @default(autoincrement())
+  token      String    @unique @db.VarChar(255)
+  expiryDate DateTime? @db.Timestamptz(6)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  userId     Int
+  users      users?    @relation(fields: [userId], references: [id])
+}
+
+model releases {
+  id                Int                @id @unique @default(autoincrement())
+  discogsId         Int
+  dateAdded         DateTime           @db.Timestamptz(6)
+  title             String             @db.VarChar(255)
+  resourceUrl       String?            @db.VarChar(255)
+  coverUrl          String?            @db.VarChar(255)
+  coverThumbnail    String?            @db.VarChar(255)
+  releaseYear       Int?
+  masterReleaseYear Int?
+  masterId          Int?
+  masterUrl         String?            @db.VarChar(255)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  userId            Int?
+  artists_releases  artists_releases[]
+  genres_releases   genres_releases[]
+  labels_releases   labels_releases[]
+  users             users?             @relation(fields: [userId], references: [id])
+  styles_releases   styles_releases[]
+
+  @@unique([discogsId, userId])
+}
+
+model styles {
+  id              Int               @id @unique @default(autoincrement())
+  name            String?           @unique @db.VarChar(255)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  styles_releases styles_releases[]
+}
+
+model styles_releases {
+  release  Int
+  style    Int
+  releases releases @relation(fields: [release], references: [id], onDelete: Cascade)
+  styles   styles   @relation(fields: [style], references: [id], onDelete: Cascade)
+
+  @@unique([release, style])
+}
+
+model users {
+  id            Int             @id @unique @default(autoincrement())
+  username      String          @unique @db.VarChar(255)
+  email         String          @unique @db.VarChar(255)
+  password      String          @db.VarChar(255)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  refreshTokens refreshTokens[]
+  releases      releases[]
+}
