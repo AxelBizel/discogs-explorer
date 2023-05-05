@@ -310,6 +310,7 @@ const handleGenres = async (item: DiscogsItem, release: releases) => {
 const getCollection = async (req: any, res: Response) => {
   const userReleases = await prisma.releases.findMany({
     where: { userId: req.user.id },
+    take: 100,
   });
   res.status(200).send({
     userReleases,
