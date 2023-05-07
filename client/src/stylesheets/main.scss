@@ -1,7 +1,5 @@
 @import "reset";
 
-.App {
-
   #Header {
     background: linear-gradient(
         116deg,
@@ -84,8 +82,11 @@
     }
   }
 
-  #Collection,
-  #Dashboard {
+  #App {
+    min-height:100vh;
+    display: "flex";
+    flex-direction: "column";
+    justify-content: "center";
     background: linear-gradient(
         158deg,
         rgba(84, 84, 84, 0.03) 0%,
@@ -241,13 +242,8 @@
   .chartContainer {
     margin: 5vh 0;
     padding: 2vh 2vw;
-    background-color: white;
-  }
-
-  .counterContainer {
-    margin: 5vh 0 0 0;
-    padding: 2vh 2vw;
-    background-color: white;
+    background-color: rgba(255, 255, 255, 0.522);
+    border-radius: 20px;
   }
 
   .centered {
@@ -257,4 +253,18 @@
   .countup {
     font-size: 2.5rem;
   }
-}
+
+  .titleChart {
+    margin-bottom: 1.5rem;
+  }
+
+  .coverThumbnail {
+    aspect-ratio: 1;
+    width: 100%;
+    cursor: pointer;
+  &:hover{
+    opacity: 0.5;
+    background-color: red;
+  }
+  }
+
