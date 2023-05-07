@@ -12,11 +12,21 @@ export default function (app: express.Application) {
   });
 
   app.post("/api/fetch-collection", verifyToken, controller.fetchCollection);
+  app.post(
+    "/api/collection-count",
+    verifyToken,
+    controller.getCollectionReleaseNumber
+  );
   app.post("/api/collection", verifyToken, controller.getCollection);
   app.post(
     "/api/collection-by-year",
     verifyToken,
     controller.countByReleaseYears
+  );
+  app.post(
+    "/api/collection-by-date-added",
+    verifyToken,
+    controller.groupByAddedDate
   );
   app.post(
     "/api/collection-by-artists",

@@ -3,6 +3,7 @@ import { Response } from "express";
 import prisma from "../../prisma/prisma.js";
 import discogsClient from "disconnect";
 import { releases } from "@prisma/client";
+import _ from "lodash";
 // import fetch from "node-fetch";
 
 const discogs = new discogsClient.Client(discogsConfig).user().collection();
@@ -307,13 +308,81 @@ const handleGenres = async (item: DiscogsItem, release: releases) => {
   });
 };
 
+const getCollectionReleaseNumber = async (req: any, res: Response) => {
+  try {
+    const itemNumber = await prisma.releases.count({
+      where: { userId: req.user.id },
+    });
+
+    res.status(200).send({
+      itemNumber,
+    });
+  } catch (error) {
+    res.status(error.code).send({
+      message: error.message,
+    });
+  }
+};
+
 const getCollection = async (req: any, res: Response) => {
-  const userReleases = await prisma.releases.findMany({
-    where: { userId: req.user.id },
-  });
-  res.status(200).send({
-    userReleases,
-  });
+  const skip = (parseInt(req.query.page) - 1) * 144;
+  try {
+    const userReleases = await prisma.releases.findMany({
+      where: { userId: req.user.id },
+      skip: skip,
+      take: 144,
+      include: {
+        artists_releases: { select: { artists: { select: { name: true } } } },
+        labels_releases: { select: { labels: { select: { name: true } } } },
+        genres_releases: { select: { genres: { select: { name: true } } } },
+        styles_releases: { select: { styles: { select: { name: true } } } },
+      },
+    });
+
+    res.status(200).send({
+      userReleases,
+    });
+  } catch (error) {
+    res.status(500).send({
+      message: "get collection error",
+    });
+  }
+};
+
+const groupByAddedDate = async (req: any, res: Response) => {
+  try {
+    const rawGroupedByAddedDate = await prisma.releases.groupBy({
+      by: ["dateAdded"],
+      _count: { _all: true },
+      orderBy: { dateAdded: "asc" },
+      where: { userId: req.user.id },
+    });
+
+    const parsedDateAdded = rawGroupedByAddedDate.map((d) => {
+      return {
+        date: d.dateAdded.toISOString().split("T")[0],
+        count: d._count._all,
+      };
+    });
+
+    const groupredByParsedDateAdded = _.groupBy(parsedDateAdded, "date");
+    const result = Object.keys(groupredByParsedDateAdded).map((key) => ({
+      count: groupredByParsedDateAdded[key].reduce(
+        (acc, current) => current.count + acc,
+        0
+      ),
+      date: key,
+    }));
+
+    res.status(200).send({
+      result,
+    });
+  } catch (error) {
+    res.status(500).send({
+      message: error.message || "bad aggregation",
+    });
+  }
+  return;
 };
 
 const countByReleaseYears = async (req: any, res: Response) => {
@@ -392,7 +461,8 @@ const countByStyles = async (req: any, res: Response) => {
         inner join releases r on sr.release = r.id
         where r."userId" = ${req.user.id}
         group by s.name
-	      order by nb desc`;
+	      order by nb desc
+        limit 50`;
 
     res.status(200).send({
       result,
@@ -413,7 +483,8 @@ const countByGenres = async (req: any, res: Response) => {
         inner join releases r on gr.release = r.id
         where r."userId" = ${req.user.id}
         group by g.name
-	      order by nb desc`;
+	      order by nb desc
+        limit 6`;
 
     res.status(200).send({
       result,
@@ -444,4 +515,6 @@ export default {
   countByGenres,
   countByLabels,
   countByStyles,
+  getCollectionReleaseNumber,
+  groupByAddedDate,
 };
