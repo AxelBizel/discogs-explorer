@@ -1,5 +1,6 @@
 import { combineReducers } from "redux";
 import collection_reducer from "./collection_reducer";
+import collection_count_reducer from "./collection_count_reducer";
 import sortBy_reducer from "./sortBy_reducer";
 import filterBy_reducer from "./filterBy_reducer";
 import isLoggedIn_reducer from "./isLoggedIn_reducer";
@@ -11,6 +12,7 @@ import cardsPerPage_reducer from "./cardsPerPage_reducer";
 
 export const initState = {
   collection: null,
+  collection_count: 0,
   sortBy: { sortName: "Artist A-Z" },
   filterBy:'', 
   isLoggedIn:false,
@@ -23,6 +25,7 @@ export const initState = {
 
 const rootReducer = combineReducers({
   collection: collection_reducer,
+  collection_count: collection_count_reducer,
   years:years_reducer,
   yearsAdded:yearsAdded_reducer,
   genres:genres_reducer,
