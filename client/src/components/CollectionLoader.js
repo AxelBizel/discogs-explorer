@@ -1,47 +1,35 @@
 import React, { useState, useEffect } from "react";
 import { Progress } from "reactstrap";
-// import { connect } from "react-redux";
 import { Container, Row, Col } from "reactstrap";
-import Loader from "./Loader";
 
-const CollectionLoader = ({ cardsPerPage, number }) => {
+const CollectionLoader = ({ collectionLength, totalRelease }) => {
   const [percentageDisplayed, setPercentageDisplayed] = useState(0);
 
   useEffect(() => {
-    if (number && cardsPerPage) {
-      setPercentageDisplayed(Math.ceil((cardsPerPage / number) * 100));
-      console.log("%", percentageDisplayed);
+    if (collectionLength && totalRelease) {
+      setPercentageDisplayed(
+        Math.ceil((collectionLength / totalRelease) * 100)
+      );
     }
-  }, [cardsPerPage, percentageDisplayed]);
+  }, [collectionLength, totalRelease]);
 
   return (
     <>
-      {cardsPerPage && number && percentageDisplayed < 100 ? (
+      {collectionLength && totalRelease && percentageDisplayed < 100 && (
         <Container>
-          <Row>
+          <Row style={{ marginBottom: "2vh" }}>
             <Col>
               <p>
-                Loading collection : {cardsPerPage} / {number} (
+                Loading collection : {collectionLength} / {totalRelease} (
                 {percentageDisplayed} %)
               </p>
-
               <Progress animated color="info" value={percentageDisplayed} />
-              <Loader />
             </Col>
           </Row>
         </Container>
-      ) : (
-        <></>
       )}
     </>
   );
 };
-
-// function mstp(state) {
-//   return {
-//     collection: state.collection,
-//     cardsPerPage: state.cardsPerPage
-//   };
-// }
 
 export default CollectionLoader;

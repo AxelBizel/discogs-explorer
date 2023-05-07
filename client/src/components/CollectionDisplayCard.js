@@ -1,57 +1,112 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
+  Button,
   Col,
-  Card,
-  CardImg,
-  CardText,
-  CardBody,
-  CardTitle,
-  CardSubtitle
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
 } from "reactstrap";
+import Axios from "axios";
 
-function CollectionDisplayCard(props) {
-  const { item, index } = props;
+function CollectionDisplayCard({ item, index }) {
   const [delay, setDelay] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  const [discogsLink, setDiscogsLink] = useState(null);
+  const toggleModal = () => {
+    setShowModal(!showModal);
+  };
 
   useEffect(() => {
     if (window.matchMedia("(min-width: 992px)").matches) {
-      setDelay((index % 4) * 200);
+      setDelay((index % 12) * 50);
     } else if (window.matchMedia("(min-width: 768px)").matches) {
-      setDelay((index % 2) * 200);
+      setDelay((index % 6) * 50);
+    } else if (window.matchMedia("(min-width: 576px)").matches) {
+      setDelay((index % 4) * 50);
+    } else {
+      setDelay((index % 3) * 50);
     }
   }, [index]);
+
+  const getExternalLink = useCallback(async () => {
+    const link = await Axios.get(item.resourceUrl);
+    setDiscogsLink(link.data.uri);
+  }, [item]);
+
+  useEffect(() => {
+    if (showModal) {
+      getExternalLink();
+    }
+  }, [showModal, getExternalLink]);
 
   return (
     <>
       <Col
-        xs="12"
-        sm="6"
-        lg="3"
+        xs="4"
+        sm="3"
+        md="2"
+        lg="1"
         key={index}
         data-aos="fade-up"
         data-aos-duration="500"
         data-aos-delay={delay}
+        style={{ margin: 0, padding: 0 }}
       >
-        <Card style={{ margin: "1vh 1vw" }}>
-          <CardImg
-            top
-            width="100%"
-            src={`${item.cover_image}`}
-            alt="Card image cap"
+        <div
+          onClick={toggleModal}
+          style={{
+            margin: 5,
+            alignItems: "center",
+            textAlign: "center",
+            padding: "auto",
+          }}
+        >
+          <img
+            alt="coverThumbnail"
+            className="coverThumbnail"
+            src={item.coverThumbnail}
           />
-          <CardBody>
-            <CardTitle style={{ marginBottom: "0.5rem", fontWeight: "bold" }}>
-              {item.artists.map(artist => `${artist.name} `)}
-            </CardTitle>
-            <CardSubtitle>{item.title}</CardSubtitle>
-            <CardText style={{ fontStyle: "italic", fontSize: "0.8em" }}>
-              Label(s): {item.labels.map(label => `${label.name} `)} <br></br>
-              Année : {item.year} <br></br>
-              Format(s) : {item.formats.map(format => `${format.name} `)}
-            </CardText>
-          </CardBody>
-        </Card>
+        </div>
       </Col>
+      {showModal && (
+        <Modal isOpen={showModal} toggle={toggleModal} centered>
+          <ModalHeader>
+            <img src={item.coverUrl} width={"100%"} alt="Release cover" />
+          </ModalHeader>
+          <ModalBody>
+            <span style={{ fontWeight: "bold", fontSize: "1.2rem" }}>
+              {item.artists_releases.map((a) => ` ${a.artists.name}`).join(",")}
+            </span>
+            <br />
+            {item.title}
+            <br />
+            <span
+              style={{
+                textDecoration: "italic",
+                fontSize: "0.8em",
+              }}
+            >
+              {item.labels_releases.length > 1 ? "Labels :" : "Label :"}
+              {item.labels_releases.map((l) => ` ${l.labels.name}`).join(",")}
+            </span>
+            <br />
+            <span style={{ textDecoration: "italic", fontSize: "0.8em" }}>
+              Release year : {item.releaseYear}
+            </span>
+          </ModalBody>
+          <ModalFooter>
+            {discogsLink && (
+              <a href={discogsLink} target="_blank" rel="noopener noreferrer">
+                <Button color="#fff">View on Discogs</Button>
+              </a>
+            )}
+            <Button color="secondary" onClick={toggleModal}>
+              Close
+            </Button>
+          </ModalFooter>
+        </Modal>
+      )}
     </>
   );
 }

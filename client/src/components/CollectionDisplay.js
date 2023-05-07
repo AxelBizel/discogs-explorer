@@ -1,120 +1,137 @@
-import React, { useState, useEffect, useRef } from "react";
+import _ from "lodash";
+import React, { useState, useEffect } from "react";
 import CollectionDisplayCard from "./CollectionDisplayCard";
-import CollectionLoader from "./CollectionLoader";
 import { connect } from "react-redux";
 import Loader from "./Loader";
-import elementInViewport from "../helpers";
+import { Pagination, PaginationItem, PaginationLink } from "reactstrap";
+import { getReleases, getCollectionCount } from "../actions";
+import CollectionLoader from "./CollectionLoader";
 
-function CollectionDisplay(props) {
-  const { collection } = props.collection;
-  const { filterBy } = props.filterBy;
-  const { sortBy } = props.sortBy;
+function CollectionDisplay({
+  collection,
+  collection_count,
+  // filterBy,
+  // sortBy,
+  dispatch,
+}) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [cardsPerPage, setCardsPerPage] = useState(1);
-  const nextPage = useRef(null);
+  const [displayLoader, setDisplayLoader] = useState(false);
+  const [lastPage, setLastPage] = useState(undefined);
+  const [releasesToDisplay, setReleasesToDisplay] = useState(undefined);
+  const totalLength = collection?.length || 0;
+  const totalReleaseNumber = localStorage.getItem("totalReleaseNumber");
 
-  // useEffect(() => {
-  //   if (collection && cardsPerPage < collection.length + 49) {
-  //     setInterval(setCardsPerPage(cardsPerPage + 50), 200);
-  //     console.log(cardsPerPage)
-  //   }
-  // }, [cardsPerPage, getCardsPerPage, collection]);
+  useEffect(() => {
+    setDisplayLoader(collection_count < totalReleaseNumber * 0.9);
+  }, [collection_count, totalReleaseNumber]);
 
-console.log("COL DISPLAY", collection)
-  if (collection && cardsPerPage < collection.length + 49) {
-    setTimeout(() => {
-      setCardsPerPage(cardsPerPage+50);
-      console.log("CPP", cardsPerPage)
-    }, 100);
-  }
-
-
-
-
-
-  const collectionSort = (property) => {
-    switch (property) {
-      case "Artist (asc)":
-        return function (a, b) {
-          return a["artists"][0]["name"].localeCompare(b["artists"][0]["name"]);
-        };
-      case "Artist (desc)":
-        return function (a, b) {
-          return b["artists"][0]["name"].localeCompare(a["artists"][0]["name"]);
-        };
-      case "Title (asc)":
-        return function (a, b) {
-          return a["title"].localeCompare(b["title"]);
-        };
-      case "Title (desc)":
-        return function (a, b) {
-          return b["title"].localeCompare(a["title"]);
-        };
-      case "Year (asc)":
-        return function (a, b) {
-          return a["year"].toString().localeCompare(b["year"]).toString();
-        };
-      case "Year (desc)":
-        return function (a, b) {
-          return b["year"].toString().localeCompare(a["year"]).toString();
-        };
-      default:
-        break;
+  useEffect(() => {
+    if (!collection_count) {
+      dispatch(getCollectionCount());
     }
+  }, [dispatch, collection_count]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (displayLoader) {
+        dispatch(getCollectionCount());
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [displayLoader]);
+
+  useEffect(() => {
+    if (collection?.length) {
+      setReleasesToDisplay(_.cloneDeep(collection));
+    } else {
+      setReleasesToDisplay([]);
+    }
+  }, [totalLength, currentPage, collection]);
+
+  useEffect(() => {
+    setLastPage(Math.ceil(collection_count / 144));
+  }, [collection_count]);
+
+  useEffect(() => {
+    dispatch(getReleases(currentPage));
+  }, [currentPage, dispatch]);
+
+  const handlePage = (direction) => {
+    if (direction === "next") {
+      setCurrentPage(currentPage + 1);
+    } else if ((direction = "previous")) {
+      setCurrentPage(currentPage - 1);
+    }
+    setReleasesToDisplay(undefined);
   };
 
-  let currentCards = null;
-  const indexOfLastCard = currentPage * cardsPerPage;
-  const indexOfFirstCard = indexOfLastCard - cardsPerPage;
-  if (collection && sortBy) {
-    currentCards = collection
-    .sort(collectionSort(sortBy))
-    .slice(indexOfFirstCard, indexOfLastCard);
-  }
+  // const collectionSort = (property) => {
+  //   switch (property) {
+  //     case "Artist (asc)":
+  //       return function (a, b) {
+  //         return a["artists_releases"][0]["artists"]["name"].localeCompare(
+  //           b["artists_releases"][0]["artists"]["name"]
+  //         );
+  //       };
+  //     case "Artist (desc)":
+  //       return function (a, b) {
+  //         return b["artists_releases"][0]["artists"]["name"].localeCompare(
+  //           a["artists_releases"][0]["artists"]["name"]
+  //         );
+  //       };
+  //     case "Title (asc)":
+  //       return function (a, b) {
+  //         return a["title"].localeCompare(b["title"]);
+  //       };
+  //     case "Title (desc)":
+  //       return function (a, b) {
+  //         return b["title"].localeCompare(a["title"]);
+  //       };
+  //     case "Year (asc)":
+  //       return function (a, b) {
+  //         return a["releaseYear"]
+  //           .toString()
+  //           .localeCompare(b["year"])
+  //           .toString();
+  //       };
+  //     case "Year (desc)":
+  //       return function (a, b) {
+  //         return b["releaseYear"]
+  //           .toString()
+  //           .localeCompare(a["year"])
+  //           .toString();
+  //       };
+  //     default:
+  //       break;
+  //   }
+  // };
 
-  // Load more cards when scroll down to bottom
-  // if (nextPage.current &&
-  //   collection &&
-  //   cardsPerPage &&
-  //   cardsPerPage < collection.length) {
-  //   window.addEventListener("scroll", () => {
-  //     if (
-  //       elementInViewport(nextPage.current)
-  //     ) {
-  //       setCardsPerPage(cardsPerPage + 50);
-  //     }
-  //   });
-  // }
-
-  //
-
-  // if (previousPage.current && currentPage > 1) {
-  //   window.addEventListener("scroll", () => {
-  //     if (elementInViewport(nextPage.current)) {
-  //       setCurrentPage(currentPage-1);
-  //     }
-  //   });
+  // if (collection && sortBy) {
+  //   releasesToDisplay = collection.sort(collectionSort(sortBy));
   // }
 
   return (
     <>
-    {collection && cardsPerPage && cardsPerPage < collection.length ? 
-      <CollectionLoader cardsPerPage={cardsPerPage} number={collection.length} /> : <></>}
-      {collection === null || sortBy === undefined ? (
+      {displayLoader && (
+        <CollectionLoader
+          collectionLength={collection_count}
+          totalRelease={totalReleaseNumber}
+        />
+      )}
+      {!collection || !releasesToDisplay ? (
         <Loader />
       ) : (
-        currentCards
-          .sort(collectionSort(sortBy))
-          .filter((item) => {
-            const regex = new RegExp(filterBy, "i");
-            return regex.test(
-              item.title +
-                item.artists.map((a) => a.name).join("") +
-                item.labels.map((l) => l.name).join("") +
-                item.formats.map((f) => f.name).join("") +
-                item.year
-            );
-          })
+        releasesToDisplay
+          // .sort(collectionSort(sortBy))
+          // .filter((item) => {
+          //   const regex = new RegExp(filterBy, "i");
+          //   return regex.test(
+          //     item.title +
+          //       item.artists_releases.map((a) => a.artists.name).join("") +
+          //       item.labels_releases.map((l) => l.labels.name).join("") +
+          //       item.releaseYear
+          //   );
+          // })
           .map((item, index) => (
             <CollectionDisplayCard
               key={`card-${index}`}
@@ -123,7 +140,28 @@ console.log("COL DISPLAY", collection)
             />
           ))
       )}
-      {/* <span ref={nextPage}></span> */}
+      <div
+        style={{
+          margin: "auto",
+          marginTop: "2vh",
+          width: 200,
+          flexDirection: "row",
+          justifyContent: "center",
+        }}
+      >
+        <Pagination aria-label="Page navigation example">
+          {currentPage > 1 && releasesToDisplay && (
+            <PaginationItem>
+              <PaginationLink previous onClick={() => handlePage("previous")} />
+            </PaginationItem>
+          )}
+          {currentPage < lastPage && releasesToDisplay && (
+            <PaginationItem>
+              <PaginationLink next onClick={() => handlePage("next")} />
+            </PaginationItem>
+          )}
+        </Pagination>
+      </div>
     </>
   );
 }
@@ -131,17 +169,10 @@ console.log("COL DISPLAY", collection)
 function mstp(state) {
   return {
     collection: state.collection,
-    sortBy: state.sortBy,
-    filterBy: state.filterBy
+    collection_count: state.collection_count,
+    // sortBy: state.sortBy,
+    // filterBy: state.filterBy,
   };
 }
-
-// function mdtp(dispatch) {
-//   return {
-//     getCardsPerPage: (cardsPerPage) => {
-//       dispatch(getCardsPerPage(cardsPerPage));
-//     },
-//   };
-// }
 
 export default connect(mstp)(CollectionDisplay);

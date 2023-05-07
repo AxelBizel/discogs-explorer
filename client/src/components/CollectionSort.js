@@ -3,12 +3,12 @@ import {
   ButtonDropdown,
   DropdownToggle,
   DropdownMenu,
-  DropdownItem
+  DropdownItem,
 } from "reactstrap";
 import { sortReleases } from "../actions";
 import { connect } from "react-redux";
 
-const CollectionSort = props => {
+const CollectionSort = (props) => {
   const [dropdownOpen, setOpen] = useState(false);
   const [sortBy, setSortBy] = useState("Artist (asc)");
   const toggle = () => setOpen(!dropdownOpen);
@@ -19,8 +19,8 @@ const CollectionSort = props => {
   }, [sortBy, sortReleases]);
 
   return (
-    <ButtonDropdown isOpen={dropdownOpen} toggle={toggle} style={{ margin: "1vh 1vw" }}>
-      <DropdownToggle caret>Sort by {sortBy}</DropdownToggle>
+    <ButtonDropdown isOpen={dropdownOpen} toggle={toggle}>
+      <DropdownToggle caret>{sortBy}</DropdownToggle>
       <DropdownMenu>
         <DropdownItem onClick={() => setSortBy("Artist (asc)")}>
           Artist (asc)
@@ -49,9 +49,9 @@ const CollectionSort = props => {
 
 function mdtp(dispatch) {
   return {
-    sortReleases: sortBy => {
+    sortReleases: (sortBy) => {
       dispatch(sortReleases(sortBy));
-    }
+    },
   };
 }
 

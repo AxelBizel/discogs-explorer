@@ -17,25 +17,22 @@ function CollectionFilter(props) {
       name="filter"
       id="filter"
       placeholder="Type to filter by artist, title, label or date"
-      style={{ margin: "1vh 1vw" }}
-      onChange={e => setFilter(e.target.value)}
+      onChange={(e) => setFilter(e.target.value)}
     />
   );
 }
 
-
 function mstp(state) {
   return {
-    filterBy: state.filterBy
+    filterBy: state.filterBy,
   };
 }
 
-
 function mdtp(dispatch) {
   return {
-    filterReleases: filter => {
+    filterReleases: (filter) => {
       dispatch(filterReleases(filter));
-    }
+    },
   };
 }
 
