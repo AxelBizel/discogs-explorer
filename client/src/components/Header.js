@@ -1,5 +1,5 @@
 import React from "react";
-import { Row, Col, Container, Button, Tooltip } from "reactstrap";
+import { Row, Col, Container } from "reactstrap";
 import logoDiscogs from "../logoDiscogs.svg";
 import Navigation from "./Navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

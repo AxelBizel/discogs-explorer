@@ -38,7 +38,7 @@ function CollectionDisplay({
       }
     }, 1000);
     return () => clearInterval(interval);
-  }, [displayLoader]);
+  }, [displayLoader, dispatch]);
 
   useEffect(() => {
     if (collection?.length) {
@@ -144,12 +144,11 @@ function CollectionDisplay({
         style={{
           margin: "auto",
           marginTop: "2vh",
-          width: 200,
           flexDirection: "row",
           justifyContent: "center",
         }}
       >
-        <Pagination aria-label="Page navigation example">
+        <Pagination aria-label="Page navigation example" style={{ margin: 0 }}>
           {currentPage > 1 && releasesToDisplay && (
             <PaginationItem>
               <PaginationLink previous onClick={() => handlePage("previous")} />

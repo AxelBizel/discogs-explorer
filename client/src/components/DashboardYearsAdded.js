@@ -4,16 +4,6 @@ import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { Line } from "react-chartjs-2";
 
 const DashboardYearsAdded = ({ yearsAdded }) => {
-  // let yearsAddedArray = yearsAdded.sort();
-  // let graphLabels = [new Date(yearsAddedArray[0])];
-  // let graphValues = [0];
-
-  // for (let i = 0; i < yearsAddedArray.length; i++) {
-  //   graphLabels.push(yearsAddedArray[i]);
-  //   graphValues.push(i);
-  // }
-  console.log("yearsAdded", yearsAdded);
-
   const data = {
     labels: yearsAdded.map((y) => y.date),
 

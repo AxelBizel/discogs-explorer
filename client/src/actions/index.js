@@ -42,7 +42,6 @@ export const getReleases = (page) => {
 export const getCollectionCount = () => {
   return (dispatch) => {
     instance.post("collection-count").then((res) => {
-      console.log("res.data.itemNumber", res.data.itemNumber);
       dispatch({
         type: "GET_COLLECTION_COUNT",
         payload: res.data.itemNumber,
@@ -65,7 +64,6 @@ export const getYears = () => {
 export const getYearsAdded = () => {
   return (dispatch) => {
     instance.post("collection-by-date-added/").then((res) => {
-      console.log(res.data);
       dispatch({
         type: "GET_YEARSADDED",
         payload: res.data,
@@ -88,7 +86,6 @@ export const getGenres = () => {
 export const getStyles = () => {
   return (dispatch) => {
     instance.post("collection-by-styles/").then((res) => {
-      console.log("styles", res.data);
       dispatch({
         type: "GET_STYLES",
         payload: res.data,

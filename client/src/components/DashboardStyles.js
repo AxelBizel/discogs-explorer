@@ -4,8 +4,6 @@ import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { HorizontalBar } from "react-chartjs-2";
 
 const DashboardStyles = ({ styles }) => {
-  console.log("styles", styles);
-
   const data = {
     labels: styles.map((s) => s.name),
     datasets: [

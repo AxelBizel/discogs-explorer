@@ -14,7 +14,6 @@ import DashboardYearsAdded from "./DashboardYearsAdded";
 import DashboardGenres from "./DashboardGenres";
 import DashboardStyles from "./DashboardStyles";
 import Counter from "./Counter";
-import Header from "./Header";
 
 const Dashboard = ({
   dispatch,
