@@ -3,43 +3,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { Radar } from "react-chartjs-2";
 
-const DashboardGenres = genres => {
-  let genresArray = genres.genres
-    .map(g => {
-      for (let i = 0; i < g.length; i++) {
-        if (g[i].includes("Folk")) g[i] = "Folk/World";
-      }
-      return g;
-    })
-    .join(",")
-    .split(",")
-    .sort();
-
-  let graphLabels = [];
-  let graphValues = [];
-
-  for (let i = 0; i < genresArray.length; i++) {
-    if (graphLabels.includes(genresArray[i])) {
-      graphValues[graphLabels.indexOf(genresArray[i])] += 1;
-    } else {
-      graphLabels.push(genresArray[i]);
-      graphValues.push(1);
-    }
-  }
-  const reducer = (accumulator, currentValue) => accumulator + currentValue;
-  let sum = graphValues.reduce(reducer);
-  let graphLabelsSliced = [];
-  let graphValuesSliced = [];
-
-  for (let i = 0; i < graphValues.length; i++) {
-    if (graphValues[i] / sum > 0.03) {
-      graphLabelsSliced.push(graphLabels[i]);
-      graphValuesSliced.push(graphValues[i]);
-    }
-  }
-
+const DashboardGenres = ({ genres }) => {
   const data = {
-    labels: graphLabelsSliced,
+    labels: genres.map((g) =>
+      g.name.replace("Folk, World, & Country", "Folk/World")
+    ),
     aspectRatio: 1,
     datasets: [
       {
@@ -51,24 +19,10 @@ const DashboardGenres = genres => {
 
         hoverBackgroundColor: "rgba(75,192,192,0.6)",
         hoverBorderColor: "rgba(75,192,192,1)",
-        data: graphValuesSliced
-      }
-    ]
+        data: genres.map((g) => g.nb),
+      },
+    ],
   };
-
-  // const options = {
-  //   scale: {
-  //     angleLines: {
-  //       display: true
-  //     },
-  //     ticks: {
-  //       display: true
-  //     }
-  //   },
-  //   label:{
-  //     display:false
-  //   }
-  // };
 
   return (
     <>

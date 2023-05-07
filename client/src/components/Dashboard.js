@@ -4,47 +4,45 @@ import { connect } from "react-redux";
 import {
   getYears,
   getYearsAdded,
+  getCollectionCount,
   getGenres,
   getStyles,
-  getReleases,
 } from "../actions";
 import Loader from "./Loader";
 import DashboardYearsRelease from "./DashboardYearsRelease";
 import DashboardYearsAdded from "./DashboardYearsAdded";
 import DashboardGenres from "./DashboardGenres";
 import DashboardStyles from "./DashboardStyles";
-import CountUp from "react-countup";
 import Counter from "./Counter";
+import Header from "./Header";
 
-const Dashboard = (props) => {
-  const { dispatch, years, yearsAdded, genres, styles } = props;
-  const {collection} = props.collection
+const Dashboard = ({
+  dispatch,
+  years,
+  collection_count,
+  yearsAdded,
+  genres,
+  styles,
+}) => {
   useEffect(() => {
     dispatch(getYears());
     dispatch(getYearsAdded());
+    dispatch(getCollectionCount());
     dispatch(getGenres());
     dispatch(getStyles());
-    dispatch(getReleases());
   }, [dispatch]);
-
-  console.log("DASHBOARD COL", collection);
 
   return (
     <div id="Dashboard">
       <Container>
-        <Row>
-          <Col>
-            <div className="counterContainer">
-              <h3 className="centered">
-                You got{" "}
-                <span className="countup">
-                  <Counter number={collection ? collection.length : 0} />
-                </span>{" "}
-                releases in your collection
-              </h3>
-            </div>
-          </Col>
-        </Row>
+        <h3 className="centered" style={{ paddingTop: "2vh" }}>
+          You got{" "}
+          <span className="countup">
+            <Counter number={collection_count} />
+          </span>{" "}
+          releases in your collection
+        </h3>
+
         <Row>
           <Col xs="12" md="6" data-aos="fade-right" data-aos-duration="1000">
             {years === null ? (
@@ -52,22 +50,7 @@ const Dashboard = (props) => {
             ) : (
               <div className="chartContainer">
                 <h4 className="titleChart">Repartition by release year</h4>
-                <p>In number of releases</p>
-                <DashboardYearsRelease years={years.years} />
-              </div>
-            )}
-
-            {yearsAdded === null ? (
-              <Loader />
-            ) : (
-              <div
-                className="chartContainer"
-                data-aos="fade-up"
-                data-aos-duration="1000"
-              >
-                <h4 className="titleChart">Repartition by add date</h4>
-                <p>In cumulative number of releases</p>
-                <DashboardYearsAdded yearsAdded={yearsAdded.yearsAdded} />
+                <DashboardYearsRelease years={years} />
               </div>
             )}
 
@@ -79,12 +62,20 @@ const Dashboard = (props) => {
                 data-aos="fade-up"
                 data-aos-duration="1000"
               >
-                <h4 className="titleChart">Repartition by genres</h4>
-                <p>In number of releases</p>
-                <DashboardGenres genres={genres.genres} />
-                <p>
-                  <em>Genres underneath 3% of collection are not displayed</em>
-                </p>
+                <h4 className="titleChart">Top 6 genres</h4>
+                <DashboardGenres genres={genres} />
+              </div>
+            )}
+            {yearsAdded === null ? (
+              <Loader />
+            ) : (
+              <div
+                className="chartContainer"
+                data-aos="fade-up"
+                data-aos-duration="1000"
+              >
+                <h4 className="titleChart">Your collection through time</h4>
+                <DashboardYearsAdded yearsAdded={yearsAdded} />
               </div>
             )}
           </Col>
@@ -94,12 +85,8 @@ const Dashboard = (props) => {
               <Loader />
             ) : (
               <div className="chartContainer">
-                <h4 className="titleChart">Repartition by styles</h4>
-                <p>In number of releases</p>
-                <DashboardStyles styles={styles.styles} />
-                <p>
-                  <em>Styles underneath 1% of collection are not displayed</em>
-                </p>
+                <h4 className="titleChart">Top 50 styles</h4>
+                <DashboardStyles styles={styles} />
               </div>
             )}
           </Col>
@@ -112,6 +99,7 @@ const Dashboard = (props) => {
 function mstp(state) {
   return {
     collection: state.collection,
+    collection_count: state.collection_count,
     years: state.years,
     yearsAdded: state.yearsAdded,
     genres: state.genres,

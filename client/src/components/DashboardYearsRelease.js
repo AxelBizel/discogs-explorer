@@ -3,15 +3,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { Line } from 'react-chartjs-2'
 
-const DashboardYearsRelease = years => {
-  let yearsArray = years.years.map(y => {
-    return y ? y : 0
-  })
-  let firstYear = yearsArray.findIndex((y, i) => y > 0 && i > 0)
-  let graphLabels = yearsArray.map((y, i) => i).slice(firstYear)
-
+const DashboardYearsRelease = ({years}) => {
+  
   const data = {
-    labels: graphLabels,
+    labels: years?.map(y=>y.year),
     datasets: [
       {
         fill: true,
@@ -31,7 +26,7 @@ const DashboardYearsRelease = years => {
         pointHoverBorderWidth: 2,
         pointRadius: 1,
         pointHitRadius: 10,
-        data: yearsArray.slice(firstYear),
+        data: years.map(y=>y.count),
         label: 'Nombre de disques sortis cette année'
       }
     ]
@@ -39,7 +34,7 @@ const DashboardYearsRelease = years => {
 
   return (
     <>
-      {yearsArray ? (
+      {years ? (
         <Line
           data={data}
           width={100}

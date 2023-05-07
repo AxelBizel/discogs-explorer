@@ -5,7 +5,7 @@ function Counter({ number }) {
   const [go, setGo] = useState(false);
   const [counter, setCounter] = useState(false);
   const element = useRef(null);
-  const timer = 10000;
+  const timer = 250;
   const range = number / timer;
 
   if (counter < number && go) {
@@ -18,13 +18,6 @@ function Counter({ number }) {
     if (elementInViewport(element.current)) {
       setGo(true);
     }
-
-    // // window.addEventListener("scroll", () => {
-    // //     if (elementInViewport(element.current) === false) {
-    // //         setNumber(true);
-    // //       }
-
-    // });
   }
 
   return <span ref={element}>{counter}</span>;
