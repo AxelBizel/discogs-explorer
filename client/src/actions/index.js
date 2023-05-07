@@ -1,95 +1,122 @@
 import axios from "axios";
 
-const headers = {
-  'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin' : '*',
-  'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNjgzMjk1MTQ5LCJleHAiOjE2ODMyOTg3NDl9.CaAFtLdwCN2058I4ka_Ru8e8SR8_knrWYCSc_dL1Wg4'
-}
-// axios.defaults.headers.post['Content-Type'] ='application/x-www-form-urlencoded';
+const token = localStorage.getItem("token");
 
-export const getReleases = () => {
-  return dispatch => {
-    axios.post("http://127.0.0.1:8080/api/collection", null,  {
-      headers: headers
-    }).then(res => {
-      console.log("res.data", res.data.userReleases)
+const instance = axios.create({
+  baseURL: "http://127.0.0.1:8080/api/",
+  timeout: 5000,
+  headers: {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    Authorization: `Bearer ${token}`,
+  },
+});
+
+instance.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  async (error) => {
+    if (error.response) {
+      if (error.response.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.assign("/login");
+      }
+      return Promise.reject(error);
+    }
+  }
+);
+
+export const getReleases = (page) => {
+  return (dispatch) => {
+    instance.post(`collection?page=${page}`).then((res) => {
       dispatch({
         type: "GET_COLLECTION",
-        payload: res.data.userReleases
+        payload: res.data.userReleases,
+      });
+    });
+  };
+};
+
+export const getCollectionCount = () => {
+  return (dispatch) => {
+    instance.post("collection-count").then((res) => {
+      console.log("res.data.itemNumber", res.data.itemNumber);
+      dispatch({
+        type: "GET_COLLECTION_COUNT",
+        payload: res.data.itemNumber,
       });
     });
   };
 };
 
 export const getYears = () => {
-  return dispatch => {
-    axios.get("http://localhost:8080/api/years/").then(res => {
+  return (dispatch) => {
+    instance.post("collection-by-year/").then((res) => {
       dispatch({
         type: "GET_YEARS",
-        payload: res.data
+        payload: res.data.parsedYears,
       });
     });
   };
 };
 
 export const getYearsAdded = () => {
-  return dispatch => {
-    axios.get("http://localhost:8080/api/yearsAdded/").then(res => {
+  return (dispatch) => {
+    instance.post("collection-by-date-added/").then((res) => {
+      console.log(res.data);
       dispatch({
         type: "GET_YEARSADDED",
-        payload: res.data
+        payload: res.data,
       });
     });
   };
 };
 
-
 export const getGenres = () => {
-  return dispatch => {
-    axios.get("http://localhost:8080/api/genres/").then(res => {
+  return (dispatch) => {
+    instance.post("collection-by-genres/").then((res) => {
       dispatch({
         type: "GET_GENRES",
-        payload: res.data
+        payload: res.data.result,
       });
     });
   };
 };
 
 export const getStyles = () => {
-  return dispatch => {
-    axios.get("http://localhost:8080/api/styles/").then(res => {
+  return (dispatch) => {
+    instance.post("collection-by-styles/").then((res) => {
+      console.log("styles", res.data);
       dispatch({
         type: "GET_STYLES",
-        payload: res.data
+        payload: res.data,
       });
     });
   };
 };
 
-
-export const sortReleases = sortBy => {
+export const sortReleases = (sortBy) => {
   return {
     type: "SORT_COLLECTION",
-    payload: sortBy
+    payload: sortBy,
   };
 };
 
-export const filterReleases = filterBy => {
+export const filterReleases = (filterBy) => {
   return {
     type: "FILTER_COLLECTION",
-    payload: filterBy
+    payload: filterBy,
   };
 };
 
-
-export const isLoggedIn = loggedIn => {
+export const isLoggedIn = (loggedIn) => {
   return {
     type: "RESET_LOGGED_IN",
-    payload: !loggedIn
+    payload: !loggedIn,
   };
-}
-
-
+};
 
 // export const getCardsPerPage = cardsPerPage => {
 //   return {

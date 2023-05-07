@@ -1,74 +1,24 @@
-import React from 'react'
-import { Container, Row, Col, Spinner } from 'reactstrap'
+import React from "react";
+import { Spinner } from "reactstrap";
 
-function Loader (props) {
+function Loader() {
   return (
-    <div className='App'>
-      <Container>
-        <Row>
-          <Col xs='6' lg='3'>
-            <Spinner
-              type='border'
-              color='dark'
-              style={{ margin: '5vh ', width: '10vw', height: '10vw' }}
-            />
-          </Col>
-          <Col xs='6' lg='3'>
-            <Spinner
-              type='border'
-              color='dark'
-              style={{ margin: '5vh ', width: '10vw', height: '10vw' }}
-            />
-          </Col>
-          <Col xs='6' lg='3'>
-            <Spinner
-              type='border'
-              color='dark'
-              style={{ margin: '5vh ', width: '10vw', height: '10vw' }}
-            />
-          </Col>
-          <Col xs='6' lg='3'>
-            <Spinner
-              type='border'
-              color='dark'
-              style={{ margin: '5vh ', width: '10vw', height: '10vw' }}
-            />
-          </Col>
-        </Row>
-
-        <Row>
-          <Col xs='6' lg='3'>
-            <Spinner
-              type='border'
-              color='dark'
-              style={{ margin: '5vh ', width: '10vw', height: '10vw' }}
-            />
-          </Col>
-          <Col xs='6' lg='3'>
-            <Spinner
-              type='border'
-              color='dark'
-              style={{ margin: '5vh ', width: '10vw', height: '10vw' }}
-            />
-          </Col>
-          <Col xs='6' lg='3'>
-            <Spinner
-              type='border'
-              color='dark'
-              style={{ margin: '5vh ', width: '10vw', height: '10vw' }}
-            />
-          </Col>
-          <Col xs='6' lg='3'>
-            <Spinner
-              type='border'
-              color='dark'
-              style={{ margin: '5vh ', width: '10vw', height: '10vw' }}
-            />
-          </Col>
-        </Row>
-      </Container>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "center",
+        width: "100%",
+        height: "100%",
+      }}
+    >
+      <Spinner
+        type="border"
+        color="dark"
+        style={{ width: 200, height: 200, marginTop: 200 }}
+      />
     </div>
-  )
+  );
 }
 
-export default Loader
+export default Loader;
