@@ -1,6 +1,6 @@
 import discogsConfig from "../config/discogs.config.js";
 import { Response } from "express";
-import prisma from "../../prisma/prisma.js";
+import prisma from "../../../prisma/prisma.js";
 import discogsClient from "disconnect";
 import { releases } from "@prisma/client";
 import _ from "lodash";

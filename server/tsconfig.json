@@ -4,7 +4,7 @@
     "esModuleInterop": true,
     "target": "ESNext",
     "moduleResolution": "node",
-    "outDir": "dist",
+    "outDir": "public",
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "isolatedModules": false,

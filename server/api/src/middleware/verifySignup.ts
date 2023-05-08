@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import fetch from "node-fetch";
-import prisma from "../../prisma/prisma.js";
+import prisma from "../../../prisma/prisma.js";
 
 const discogsEndpoint = "https://api.discogs.com/users/";
 

@@ -2,5 +2,5 @@
   "watch": ["./"],
   "ext": ".ts,.js",
   "ignore": [],
-  "exec": "npx node --loader ts-node/esm ./index.js"
+  "exec": "npx node --loader ts-node/esm ./api/index.js"
 }
